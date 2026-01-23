@@ -1,0 +1,56 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "AuthService2024003.Persistence/1.0.0": {
+        "dependencies": {
+          "AuthService2024003.Application": "1.0.0",
+          "AuthService2024003.Domain": "1.0.0"
+        },
+        "runtime": {
+          "AuthService2024003.Persistence.dll": {}
+        }
+      },
+      "AuthService2024003.Application/1.0.0": {
+        "dependencies": {
+          "AuthService2024003.Domain": "1.0.0"
+        },
+        "runtime": {
+          "AuthService2024003.Application.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "AuthService2024003.Domain/1.0.0": {
+        "runtime": {
+          "AuthService2024003.Domain.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "AuthService2024003.Persistence/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "AuthService2024003.Application/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "AuthService2024003.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
