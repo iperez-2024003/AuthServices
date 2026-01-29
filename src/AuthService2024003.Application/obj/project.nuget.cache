@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "ZtUSKKa9hTk=",
+  "dgSpecHash": "DrhbuNf0iJY=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Informatica\\Documents\\AuthService2024003\\src\\AuthService2024003.Application\\AuthService2024003.Application.csproj",
+  "projectFilePath": "C:\\Users\\Informatica\\AuthServices\\src\\AuthService2024003.Application\\AuthService2024003.Application.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Informatica\\.nuget\\packages\\konscious.security.cryptography.argon2\\1.3.1\\konscious.security.cryptography.argon2.1.3.1.nupkg.sha512",
     "C:\\Users\\Informatica\\.nuget\\packages\\konscious.security.cryptography.blake2\\1.1.1\\konscious.security.cryptography.blake2.1.1.1.nupkg.sha512",
