@@ -1,48 +1,136 @@
+using AuthService2024003.Application.Interfaces;
+using Konscious.Security.Cryptography;
+using System.Reflection.Metadata;
 using System.Security.Cryptography;
 using System.Text;
  
 namespace AuthService2024003.Application.Services;
  
-public static class UuidGenerator
+public class PasswordHashService : IPasswordHashService
 {
-    public static readonly string Alphabet = "123456789ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
+    private const int SaltSize = 16; // cantidad de caracteres que tendra el hash
+    private const int HashSize = 32; //Tamaño del hash
+    private const int Iterations = 2; // iteraiones cuantas veceses se le asignara el hash a la contraseña
+    private const int Memory = 102400; // Espacio memorio
+    private const int Parallelism = 8; // Cantidad de nucleos que el procesador utilizara
  
-    public static string GenerateShortUUID()
+    public string HashPassword(string password)
     {
-        using var rng = RandomNumberGenerator.Create();
-        var bytes = new byte[12];
-        rng.GetBytes(bytes);
- 
-        var result = new StringBuilder(12);
-        for(int i = 0; i < 12; i++)
+        var salt = new Byte[SaltSize];
+        using (var rng = RandomNumberGenerator.Create())
         {
-            result.Append(Alphabet[bytes[i] % Alphabet.Length]);
+            rng.GetBytes(salt);
         }
  
-        return result.ToString();
+        var argon2 = new Argon2id(Encoding.UTF8.GetBytes(password))
+        {
+            Salt = salt,
+            DegreeOfParallelism = Parallelism,
+            Iterations = Iterations,
+            MemorySize = Memory
+        };
  
+        var hash = argon2.GetBytes(HashSize);
+ 
+        var saltBase64 = Convert.ToBase64String(salt);
+        var hashBase64 = Convert.ToBase64String(hash);
+ 
+        return $"$argon2id$v=19$m={Memory},t={Iterations},p={Parallelism}${saltBase64}${hashBase64}";
     }
  
-    public static string GenerateUserId()
+    public bool VerifyPassword(string password, string hashedPassword)
     {
-        return $"usr_{GenerateShortUUID()}";
-    }
- 
-    public static string GenerateRoleId()
-    {
-        return $"rol_{GenerateShortUUID()}";
-    }
- 
-    public static bool IsValidUserId(string? id)
-    {
-        if(string.IsNullOrEmpty(id))
-        return false;
-       
-        if(id.Length != 16 || !id.StartsWith("usr_"))
+        try
+        {
+            if(hashedPassword.StartsWith("$argon2id$"))
+            {
+                Console.WriteLine("[DEBUG] Using Argon2 standard format verification");
+                var result = VerifyArgon25tandardFormat(password, hashedPassword);
+                Console.WriteLine($"[DEBUG] Verification result: {result}");
+                return result;
+            }
+            else
+            {
+                Console.WriteLine("[DEBUG] Using legacy format verification");
+                return VerifyLegacyFormat(password, hashedPassword);
+            }
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine($"[DEBUG] Exception in VerifyPassword: {ex.Message}");
             return false;
-       
-        var idPart = id[4..];
-        return idPart.All(c => Alphabet.Contains(c));
- 
+        }
     }
+ 
+    private bool VerifyArgon25tandardFormat(string password, string hashedPassword)
+    {
+        try
+        {
+        var argon2Verifier = new Argon2id(Encoding.UTF8.GetBytes(password));
+       
+        var parts = hashedPassword.Split('$');
+ 
+        var paramsPart = parts[3];
+        var saltBase64 = parts[4];
+        var hashBase64 = parts[5];
+ 
+        var parameters = paramsPart.Split(',');
+        var memory = int.Parse(parameters[0].Split('=')[1]);
+        var iterations = int.Parse(parameters[1].Split('=')[1]);
+        var parallelism = int.Parse(parameters[2].Split('=')[1]);
+ 
+        var salt = Convert.FromBase64String(FromBase64UrlSafe(saltBase64));
+        var expectedHash = Convert.FromBase64String(FromBase64UrlSafe(hashBase64));
+ 
+        argon2Verifier.Salt = salt;
+        argon2Verifier.DegreeOfParallelism = parallelism;
+        argon2Verifier.Iterations = iterations;
+        argon2Verifier.MemorySize = memory;
+ 
+        var computedHash = argon2Verifier.GetBytes(expectedHash.Length);
+        return expectedHash.SequenceEqual(computedHash);
+ 
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error varifying Argon2 standard forman: {ex.Message}");
+            return false;
+        }
+    }
+    private bool VerifyLegacyFormat(string password, string hashedPassword)
+    {
+        var hashBytes = Convert.FromBase64String(hashedPassword);
+
+        var salt = new Byte[SaltSize];
+        var hash = new byte[HashSize];
+        Array.Copy(hashBytes, 0, salt,0, SaltSize );
+        Array.Copy(hashBytes, SaltSize, hash, 0, HashSize );
+
+        var argon2 = new Argon2id(Encoding.UTF8.GetBytes(password))
+        {
+            Salt = salt,
+            DegreeOfParallelism = Parallelism,
+            MemorySize = Memory,
+        };
+
+        var computedHash = argon2.GetBytes(HashSize);
+        return hash.SequenceEqual(computedHash);
+        
+
+    }
+    private static string FromBase64UrlSafe(string FromBase64UrlSafe)
+    {
+        string base64 = FromBase64UrlSafe.Replace('-','+').Replace('-','/');
+        switch(base64.Length % 4)
+        {
+            case 2:
+                base64 += "=";
+                break;
+            case 3:
+                base64 += "=";
+                break;
+        }
+        return base64;
+    }
+    
 }

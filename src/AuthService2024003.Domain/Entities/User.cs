@@ -29,7 +29,7 @@ public class User
     [Required(ErrorMessage = "La contraseña es obligatoria")]
     [MinLength(8, ErrorMessage = "s")]
     [MaxLength(255, ErrorMessage = "La contra no puede tener mas caracteres")]
-    public string password {get; set; } = string.Empty;
+    public string Password {get; set; } = string.Empty;
 
 
     public bool Status {get; set;} = false;
