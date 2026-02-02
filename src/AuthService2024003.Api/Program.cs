@@ -1,9 +1,30 @@
+using AuthService2024003.Persistence.Data;
+using AuthService2024003.Api.Extensions;
+using AuthService2024003.Api.ModelBinders;
+using Serilog;
+using Microsoft.ApsNetCore.Hosting.Server;
+using Microfot.ApsNetCore.Hosting.Server.Features;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.host.UserSerilog((context, services, loggerConfiguration) =>
+    loggerConfiguration
+        .ReadFrom.configuration(context.Configuration)
+        .ReadFrom.Services(services));
+
+builder.Services.AddControllers(options =>
+{
+    options.ModelBinderProviderContext.Insert(0, new FileDataModelBinderProvider());
+
+})
+.addJsonOptions(o =>
+{
+    o.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+
+});
+
+builder.Services.AddApplicationServices(builder.configuration);
 
 var app = builder.Build();
 
@@ -14,31 +35,106 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Add Serilog request logging
+app.UseSerilogRequestLogging();
+
+// Add Security Headers using NetEscapades package
+app.UseSecurityHeaders(policies => policies
+    .AddDefaultSecurityHeaders()
+    .RemoveServerHeader()
+    .AddFrameOptionsDeny()
+    .AddXssProtectionBlock()
+    .AddContentTypeOptionsNoSniff()
+    .AddReferrerPolicyStrictOriginWhenCrossOrigin()
+    .AddContentSecurityPolicy(builder =>
+    {
+        builder.AddDefaultSrc().Self();
+        builder.AddScriptSrc().Self().UnsafeInline();
+        builder.AddStyleSrc().Self().UnsafeInline();
+        builder.AddImgSrc().Self().Data();
+        builder.AddFontSrc().Self().Data();
+        builder.AddConnectSrc().Self();
+        builder.AddFrameAncestors().None();
+        builder.AddBaseUri().Self();
+        builder.AddFormAction().Self();
+    })
+    .AddCustomHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+    .AddCustomHeader("Cache-Control", "no-store, no-cache, must-revalidate, private")
+);
+
+//Global exception handling
+
+
+// Core middLewares
 app.UseHttpsRedirection();
+app.UseCors("DefaultCorsPolicy");
+app.UseRateLimiter();
+app.UseAuthentication();
+app.UseAuthorization();
 
-var summaries = new[]
+app.MapControllers();
+app.MapHelthChecks("/health");
+
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
-
-app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    var response = new
+    {
+        status = "Healthy",
+        timestamps = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffz")
+    };
+    return Results.ok(response);
 }
+
+// Startup log: addresses and health endpoint
+var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    try
+    {
+        var server = app.Services.GetRequiredService<IServer>();
+        var addressesFeature = server.Features.Get<IServerAddressesFeature>();
+        var addresses = (IEnumerable<string>?)addressesFeature?.Addresses ?? app.Urls;
+
+        if (addresses != null && addresses.Any())
+        {
+            foreach (var addr in addresses)
+            {
+                var health = $"{addr.TrimEnd('/')}/health";
+                startupLogger.LogInformation("AuthService API is running at {Url}. Health endpoint: {HealthUrl}", addr, health);
+            }
+        }
+        else
+        {
+            startupLogger.LogInformation("AuthService API started. Health endpoint: /health");
+        }
+    }
+    catch (Exception ex)
+    {
+        startupLogger.LogWarning(ex, "Failed to determine the listening addresses for startup log");
+    }
+});
+
+// Initialize database and seed data
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    try
+    {
+        logger.LogInformation("Checking database connection...");
+
+        // Ensure database is created (similar to Sequelize sync in Node.js)
+        await context.Database.EnsureCreatedAsync();
+
+        logger.LogInformation("Database ready. Running seed data...");
+        await DataSeeder.SeedAsync(context);
+
+        logger.LogInformation("Database initialization completed successfully");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "An error occurred while initializing the database");
+        throw; // Re-throw to stop the application
+    }
+}
+app.Run();

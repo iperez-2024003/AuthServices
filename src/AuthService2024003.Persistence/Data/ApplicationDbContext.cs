@@ -238,5 +238,7 @@ modelBuilder.Entity<User>(entity =>
         return string.Concat(input.Select((c, i) => i > 0 && char.IsUpper(c) ? "_" + c : c.ToString())).ToLower();
 
     }
+    
+
 
 } 

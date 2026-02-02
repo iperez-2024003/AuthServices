@@ -1,5 +1,5 @@
 using AuthService2024003.Domain.Entities;
-namespace AuthService2024003.Domain.Entities;
+namespace AuthService2024003.Domain.Interfaces;
 
 
 public interface IUserRepository
