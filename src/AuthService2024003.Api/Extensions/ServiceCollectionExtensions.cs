@@ -11,8 +11,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<ApplicationDbContext>(options => 
-            options.UserNpgsql(configuration.GetConnectionString("DefaultConnection"))
-                .UseSnakeCaseNamingConvetions());
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
+                .UseSnakeCaseNamingConvetion());
 
      services.AddScoped<IUserRepository, UserRepository>();
      services.AddScoped<IRoleRepository, RoleRepository>();
@@ -26,6 +26,9 @@ public static class ServiceCollectionExtensions
     {
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
+
+        
+        return services;
     }
    
 

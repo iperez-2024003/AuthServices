@@ -9,3 +9,15 @@ C:\Users\Informatica\Documents\AuthService2024003\src\AuthService2024003.Domain\
 C:\Users\Informatica\Documents\AuthService2024003\src\AuthService2024003.Domain\obj\Debug\net8.0\refint\AuthService2024003.Domain.dll
 C:\Users\Informatica\Documents\AuthService2024003\src\AuthService2024003.Domain\obj\Debug\net8.0\AuthService2024003.Domain.pdb
 C:\Users\Informatica\Documents\AuthService2024003\src\AuthService2024003.Domain\obj\Debug\net8.0\ref\AuthService2024003.Domain.dll
+C:\Users\Informatica\AuthServices\src\AuthService2024003.Domain\bin\Debug\net8.0\AuthService2024003.Domain.deps.json
+C:\Users\Informatica\AuthServices\src\AuthService2024003.Domain\bin\Debug\net8.0\AuthService2024003.Domain.dll
+C:\Users\Informatica\AuthServices\src\AuthService2024003.Domain\bin\Debug\net8.0\AuthService2024003.Domain.pdb
+C:\Users\Informatica\AuthServices\src\AuthService2024003.Domain\obj\Debug\net8.0\AuthService2024003.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Informatica\AuthServices\src\AuthService2024003.Domain\obj\Debug\net8.0\AuthService2024003.Domain.AssemblyInfoInputs.cache
+C:\Users\Informatica\AuthServices\src\AuthService2024003.Domain\obj\Debug\net8.0\AuthService2024003.Domain.AssemblyInfo.cs
+C:\Users\Informatica\AuthServices\src\AuthService2024003.Domain\obj\Debug\net8.0\AuthService2024003.Domain.csproj.CoreCompileInputs.cache
+C:\Users\Informatica\AuthServices\src\AuthService2024003.Domain\obj\Debug\net8.0\AuthService2024003.Domain.sourcelink.json
+C:\Users\Informatica\AuthServices\src\AuthService2024003.Domain\obj\Debug\net8.0\AuthService2024003.Domain.dll
+C:\Users\Informatica\AuthServices\src\AuthService2024003.Domain\obj\Debug\net8.0\refint\AuthService2024003.Domain.dll
+C:\Users\Informatica\AuthServices\src\AuthService2024003.Domain\obj\Debug\net8.0\AuthService2024003.Domain.pdb
+C:\Users\Informatica\AuthServices\src\AuthService2024003.Domain\obj\Debug\net8.0\ref\AuthService2024003.Domain.dll

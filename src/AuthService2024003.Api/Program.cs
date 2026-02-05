@@ -8,14 +8,14 @@ using Microfot.ApsNetCore.Hosting.Server.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.host.UserSerilog((context, services, loggerConfiguration) =>
+builder.Host.UserSerilog((context, services, loggerConfiguration) =>
     loggerConfiguration
         .ReadFrom.configuration(context.Configuration)
         .ReadFrom.Services(services));
 
 builder.Services.AddControllers(options =>
 {
-    options.ModelBinderProviderContext.Insert(0, new FileDataModelBinderProvider());
+    options.ModelBinderProviders.Insert(0, new FileDataModelBinderProvider());
 
 })
 .addJsonOptions(o =>
@@ -24,7 +24,7 @@ builder.Services.AddControllers(options =>
 
 });
 
-builder.Services.AddApplicationServices(builder.configuration);
+builder.Services.AddApplicationServices(builder.Configuration);
 
 var app = builder.Build();
 
@@ -68,12 +68,12 @@ app.UseSecurityHeaders(policies => policies
 // Core middLewares
 app.UseHttpsRedirection();
 app.UseCors("DefaultCorsPolicy");
-app.UseRateLimiter();
-app.UseAuthentication();
-app.UseAuthorization();
+//app.UseRateLimiter();
+//app.UseAuthentication();
+//app.UseAuthorization();
 
 app.MapControllers();
-app.MapHelthChecks("/health");
+app.MapHealthChecks("/health");
 
 {
     var response = new
@@ -81,7 +81,7 @@ app.MapHelthChecks("/health");
         status = "Healthy",
         timestamps = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffz")
     };
-    return Results.ok(response);
+    return Results.Ok(response);
 }
 
 // Startup log: addresses and health endpoint
