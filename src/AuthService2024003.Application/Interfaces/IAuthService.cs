@@ -7,12 +7,9 @@ public interface IAuthService
     Task<RegisterResponseDto> RegisterAsync(RegisterDto registerDto);
     Task<AuthResponseDto> LoginAsync(LoginDto loginDto);
     Task<EmailResponseDto> VerifyEmailAsync(VerifyEmailDto verifyEmailDto);
+    // AGREGA ESTA LÍNEA:
+    Task<EmailResponseDto> ResendVerificationAsync(ResendVerificationDto resendDto); 
     Task<EmailResponseDto> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto);
     Task<EmailResponseDto> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
-    Task<UserResponseDto> GetUserByIdAsync(string userId);
-
-    
-
-
- 
- }
+    Task<UserResponseDto?> GetUserByIdAsync(string userId);
+}

@@ -1,15 +1,16 @@
 using AuthService2024003.Application.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace AuthService2024003.Api.Models;
 
-public class FormFileAdapter : IfileData
+public class FormFileAdapter : IFileData
 {
-    private readonly IformFile _formFile;
-    private byte[]? data;
+    private readonly IFormFile _formFile;
+    private byte[]? _data;
 
-    public FormFileAdapter(IformFile formFile)
+    public FormFileAdapter(IFormFile formFile)
     {
-        ArgumenNullException.ThrowIfull(formFile);
+        ArgumentNullException.ThrowIfNull(formFile);
         _formFile = formFile;
     }
 

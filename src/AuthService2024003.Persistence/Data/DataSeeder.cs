@@ -3,14 +3,13 @@ using AuthService2024003.Application.Services;
 using AuthService2024003.Domain.Contants;
 using Microsoft.EntityFrameworkCore;
 using System.Data.Common;
-using AuthService2024003.Application.ServicesM;
 using System.Reflection.Metadata.Ecma335;
 
 namespace AuthService2024003.Persistence.Data;
 
 public static class DataSeeder
 {
-    public static async Task seedAsync(ApplicationDbContext context)
+    public static async Task SeedAsync(ApplicationDbContext context)
     {
         if (!context.Roles.Any())
         {

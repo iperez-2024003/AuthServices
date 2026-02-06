@@ -1,6 +1,6 @@
-using AuthService2024003.Models;
+using AuthService2024003.Api.Models; // CORREGIDO: Se agregó .Api
 using AuthService2024003.Application.Interfaces;
-using Microsoft.ApsNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace AuthService2024003.Api.ModelBinders;
 
@@ -8,9 +8,9 @@ public class FileDataModelBinder : IModelBinder
 {
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
-        ArgumentNullException.ThrowIfull(bindingContext);
+        ArgumentNullException.ThrowIfNull(bindingContext);
 
-        if (!typeof(IfileData).IsAssignableFrom(bindingContext.ModelType)) ;
+        if (!typeof(IFileData).IsAssignableFrom(bindingContext.ModelType))
         {
             return Task.CompletedTask;
         }
@@ -22,22 +22,21 @@ public class FileDataModelBinder : IModelBinder
         if(file != null && file.Length > 0)
         {
             var fileData = new FormFileAdapter(file);
-            bindingContext.Result = ModelBindingResult.Sucess(fileData);
-             }
-            else 
-            { 
-                bindingContext.Result = ModelBindingResult.Seccess(null);
-            }
-            return Task.CompletedTask;
-    
+            bindingContext.Result = ModelBindingResult.Success(fileData);
+        }
+        else 
+        { 
+            bindingContext.Result = ModelBindingResult.Success(null);
+        }
+        return Task.CompletedTask;
     }
 }
 
-public class FileDataModelBinderProvider : ImodelBinderProvider
+public class FileDataModelBinderProvider : IModelBinderProvider
 {
-    public IModelBlinder? GetBlinder(ModelBinderProviderContext context)
+    public IModelBinder? GetBinder(ModelBinderProviderContext context)
     {
-        if (typeof(IfileData).IsAssignableFrom(context.Metadata.ModelType))
+        if (typeof(IFileData).IsAssignableFrom(context.Metadata.ModelType))
         {
             return new FileDataModelBinder();
         }

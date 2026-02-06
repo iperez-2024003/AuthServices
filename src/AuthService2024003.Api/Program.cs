@@ -1,16 +1,16 @@
 using AuthService2024003.Persistence.Data;
 using AuthService2024003.Api.Extensions;
+using AuthService2024003.Api.Middlewares;
 using AuthService2024003.Api.ModelBinders;
 using Serilog;
-using Microsoft.ApsNetCore.Hosting.Server;
-using Microfot.ApsNetCore.Hosting.Server.Features;
-
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.UserSerilog((context, services, loggerConfiguration) =>
+builder.Host.UseSerilog((context, services, loggerConfiguration) =>
     loggerConfiguration
-        .ReadFrom.configuration(context.Configuration)
+        .ReadFrom.Configuration(context.Configuration)
         .ReadFrom.Services(services));
 
 builder.Services.AddControllers(options =>
@@ -18,13 +18,18 @@ builder.Services.AddControllers(options =>
     options.ModelBinderProviders.Insert(0, new FileDataModelBinderProvider());
 
 })
-.addJsonOptions(o =>
+.AddJsonOptions(o =>
 {
     o.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
 
 });
 
 builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddApiDocumentation();
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddRateLimitingPolicies();
+
+
 
 var app = builder.Build();
 
@@ -63,18 +68,20 @@ app.UseSecurityHeaders(policies => policies
 );
 
 //Global exception handling
-
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 // Core middLewares
 app.UseHttpsRedirection();
 app.UseCors("DefaultCorsPolicy");
-//app.UseRateLimiter();
-//app.UseAuthentication();
-//app.UseAuthorization();
+app.UseRateLimiter();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
+
 app.MapHealthChecks("/health");
 
+app.MapGet("/health-status", () => 
 {
     var response = new
     {
@@ -82,7 +89,7 @@ app.MapHealthChecks("/health");
         timestamps = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffz")
     };
     return Results.Ok(response);
-}
+});
 
 // Startup log: addresses and health endpoint
 var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();

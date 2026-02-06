@@ -1,4 +1,5 @@
 using AuthService2024003.Application.Interfaces;
+using AuthService2024003.Application.Services;
 using AuthService2024003.Domain.Interfaces;
 using AuthService2024003.Persistence.Data;
 using AuthService2024003.Persistence.Repositories;
@@ -12,14 +13,20 @@ public static class ServiceCollectionExtensions
     {
         services.AddDbContext<ApplicationDbContext>(options => 
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
-                .UseSnakeCaseNamingConvetion());
+                .UseSnakeCaseNamingConvention());
 
-     services.AddScoped<IUserRepository, UserRepository>();
-     services.AddScoped<IRoleRepository, RoleRepository>();
+    services.AddScoped<IUserRepository, UserRepository>();
+    services.AddScoped<IRoleRepository, RoleRepository>();
+    services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IUserManagementService, UserManagementService>();
+        services.AddScoped<IPasswordHashService, PasswordHashService>();
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<ICloudinaryService, CloudinaryService>();
+        services.AddScoped<IEmailService, EmailService>();
+    services.AddHealthChecks();
 
-     services.AddHealthChecks();
 
-     return services;
+    return services;
 }
 
     public static IServiceCollection AddApiDocumentation(this IServiceCollection services)
@@ -30,6 +37,6 @@ public static class ServiceCollectionExtensions
         
         return services;
     }
-   
+
 
  }
